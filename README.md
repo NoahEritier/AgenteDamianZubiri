@@ -146,9 +146,13 @@ Pasos concretos:
 - [x] Cliente de Prisma (`src/lib/db.ts`)
 - [x] Cliente mínimo de WhatsApp Cloud API (`src/lib/whatsapp.ts`)
 - [x] Webhook de WhatsApp (`src/app/api/whatsapp/webhook/route.ts`)
-- [x] Panel de Alumnos (solo lectura, sin datos reales todavía)
+- [x] Panel de Alumnos: listado, alta, edición y baja/reactivación
+      (`/dashboard`, `/dashboard/alumnos/nuevo`,
+      `/dashboard/alumnos/[id]`), con ficha completa (contacto, nivel,
+      fecha de ingreso, lesiones, objetivos) y sección de asistencia
 - [ ] Conectar la base de datos real (Supabase) — falta el `DATABASE_URL`
       de un proyecto real
-- [ ] Alta/edición de alumnos
+- [ ] Cargar clases (`Clase`) para que la sección de asistencia tenga algo
+      que mostrar más allá del estado vacío
 - [ ] Vista de cuotas + generación de avisos
 - [ ] Cuenta de Meta Business verificada y plantilla de WhatsApp aprobada
