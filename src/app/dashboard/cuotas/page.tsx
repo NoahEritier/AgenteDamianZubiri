@@ -6,6 +6,11 @@ import { marcarCuotaPagada } from "@/lib/actions/cuotas";
 // Prioridad #3: una vista de quién debe, de un vistazo. Muestra toda cuota
 // que no esté pagada (pendiente o vencida), la más urgente primero.
 
+// Sin esto, Next la prerenderiza como estática en build y la lista queda
+// congelada con los datos de ese momento — acá siempre tiene que reflejar
+// el estado real de la base.
+export const dynamic = "force-dynamic";
+
 type CuotaConAlumno = Prisma.CuotaGetPayload<{ include: { alumno: true } }>;
 
 const formatMonto = (monto: Prisma.Decimal | number | string) =>

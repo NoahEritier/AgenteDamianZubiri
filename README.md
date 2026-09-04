@@ -125,6 +125,22 @@ Meta Business Manager:
 Esto tarda — Meta revisa las plantillas manualmente. Conviene arrancarlo en
 paralelo mientras se construye el resto.
 
+Mientras tanto, `/dashboard/avisos` ya funciona con lo que hay: el botón
+"Generar avisos de cuotas vencidas" crea un `AvisoWhatsapp` por cada cuota
+vencida (sin duplicar si ya existe uno pendiente/enviado para esa cuota), y
+"Enviar por WhatsApp" intenta mandarlo de verdad. Sin las credenciales de
+Meta, el envío falla de forma controlada (queda marcado "Falló el envío",
+no rompe la página) — sirve para probar el flujo completo antes de tener la
+cuenta lista.
+
+**Decisión de Noah, no pedido de Damián**: el destinatario de estos avisos
+hoy es `WHATSAPP_DAMIAN_PHONE` (tu propio número, en `.env`), no el
+teléfono del alumno — Damián dijo en el cuestionario que prefiere el
+contacto personal antes que un aviso automático, así que por ahora el
+recordatorio te llega a vos primero. Cuando se confirme con él el criterio
+exacto (¿nunca ir directo al alumno? ¿solo después de X días vencido?),
+cambiar el destinatario en `src/lib/actions/avisos.ts` es una línea.
+
 ## Seguir el desarrollo en Claude Code
 
 Este primer scaffold se armó en Cowork porque no requería nada del lado de
@@ -171,6 +187,12 @@ Pasos concretos:
 - [ ] Cargar clases (`Clase`) para que la sección de asistencia tenga algo
       que mostrar más allá del estado vacío
 - [x] Vista de cuotas: quién debe, de un vistazo (`/dashboard/cuotas`),
-      con alta de cuota y marcado de pago — falta la generación de avisos
-- [ ] Avisos de cuota por WhatsApp
+      con alta de cuota y marcado de pago
+- [x] Avisos de cuota por WhatsApp (`/dashboard/avisos`): genera un
+      recordatorio por cada cuota vencida y lo manda — **por ahora a vos
+      (Damián), no directo al alumno**, hasta que confirmemos el criterio.
+      Falta que se apruebe la cuenta de Meta Business y la plantilla para
+      que el envío funcione de verdad (hoy queda marcado "Falló el envío"
+      sin credenciales, sin romper nada)
 - [ ] Cuenta de Meta Business verificada y plantilla de WhatsApp aprobada
+      (`recordatorio_cuota`)

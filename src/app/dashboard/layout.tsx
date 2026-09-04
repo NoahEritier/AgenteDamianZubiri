@@ -21,6 +21,12 @@ export default function DashboardLayout({
           >
             Cuotas
           </Link>
+          <Link
+            href="/dashboard/avisos"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            Avisos
+          </Link>
         </div>
       </nav>
       {children}

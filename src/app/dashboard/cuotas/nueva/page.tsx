@@ -2,6 +2,10 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { crearCuota } from "@/lib/actions/cuotas";
 
+// Igual que /dashboard/cuotas: si no se fuerza, Next la prerenderiza
+// estática en build y el select de alumnos queda congelado.
+export const dynamic = "force-dynamic";
+
 function periodoActual() {
   const hoy = new Date();
   const mes = String(hoy.getMonth() + 1).padStart(2, "0");
@@ -9,10 +13,18 @@ function periodoActual() {
 }
 
 export default async function NuevaCuotaPage() {
-  const alumnos = await db.alumno.findMany({
-    where: { activo: true },
-    orderBy: { apellido: "asc" },
-  });
+  let alumnos: Awaited<ReturnType<typeof db.alumno.findMany>> = [];
+  let error: string | null = null;
+
+  try {
+    alumnos = await db.alumno.findMany({
+      where: { activo: true },
+      orderBy: { apellido: "asc" },
+    });
+  } catch {
+    error =
+      "No hay conexión a la base de datos todavía — configurá DATABASE_URL en .env y corré `npx prisma migrate dev`.";
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
@@ -26,7 +38,13 @@ export default async function NuevaCuotaPage() {
         Nueva cuota
       </h1>
 
-      {alumnos.length === 0 ? (
+      {error && (
+        <p className="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          {error}
+        </p>
+      )}
+
+      {!error && alumnos.length === 0 && (
         <p className="mt-6 text-sm text-zinc-500">
           Todavía no hay alumnos activos cargados —{" "}
           <Link
@@ -37,7 +55,9 @@ export default async function NuevaCuotaPage() {
           </Link>
           .
         </p>
-      ) : (
+      )}
+
+      {!error && alumnos.length > 0 && (
         <form action={crearCuota} className="mt-6 space-y-5">
           <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
             Alumno
@@ -107,3 +127,4 @@ export default async function NuevaCuotaPage() {
     </div>
   );
 }
+
