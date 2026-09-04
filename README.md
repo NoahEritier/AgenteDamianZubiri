@@ -85,12 +85,27 @@ Más simple para arrancar: crear un proyecto gratis en
 [Supabase](https://supabase.com), copiar el connection string de Postgres a
 `DATABASE_URL` en `.env`, y correr `npx prisma migrate dev`.
 
-**Pendiente**: todavía no hay un proyecto de Supabase real conectado — hace
-falta que Damián o Noah creen el proyecto y pasen el `DATABASE_URL` (via
-`.env`, nunca commiteado). Las migraciones ya están escritas y probadas
-(`prisma/migrations/`), así que conectar la base real es correr
-`npx prisma migrate deploy` (o `migrate dev` si se van a seguir haciendo
-cambios de schema) contra ese connection string.
+**Pendiente**: ya existe el proyecto de Supabase (Noah pasó el
+`DATABASE_URL`), pero esta sesión de Claude Code corre en un sandbox en la
+nube cuya política de red bloquea conexiones TCP crudas a bases de datos
+(solo deja pasar HTTPS a través de un proxy) — es una restricción de
+infraestructura documentada, no algo para sortear. Las migraciones ya
+están escritas y probadas (`prisma/migrations/`) contra un Postgres local
+equivalente, así que conectar la base real de Supabase es correr, desde
+una máquina con salida normal a internet (tu compu, o un entorno de Claude
+Code con acceso completo a la red):
+
+```bash
+cp .env.example .env
+# completar DATABASE_URL con el connection string de Supabase
+
+npx prisma migrate deploy
+```
+
+Alternativa sin salir de Supabase: pegar el contenido de
+`prisma/migrations/20260904164642_init/migration.sql` en el SQL Editor del
+proyecto de Supabase y ejecutarlo ahí — crea el mismo schema sin necesitar
+una conexión Postgres directa.
 
 ### WhatsApp Cloud API
 
@@ -150,9 +165,12 @@ Pasos concretos:
       (`/dashboard`, `/dashboard/alumnos/nuevo`,
       `/dashboard/alumnos/[id]`), con ficha completa (contacto, nivel,
       fecha de ingreso, lesiones, objetivos) y sección de asistencia
-- [ ] Conectar la base de datos real (Supabase) — falta el `DATABASE_URL`
-      de un proyecto real
+- [ ] Conectar la base de datos real de Supabase — el `DATABASE_URL` ya lo
+      tiene Noah, falta correr la migración desde una máquina con salida
+      normal a internet (ver "Poner esto a andar" más arriba)
 - [ ] Cargar clases (`Clase`) para que la sección de asistencia tenga algo
       que mostrar más allá del estado vacío
-- [ ] Vista de cuotas + generación de avisos
+- [x] Vista de cuotas: quién debe, de un vistazo (`/dashboard/cuotas`),
+      con alta de cuota y marcado de pago — falta la generación de avisos
+- [ ] Avisos de cuota por WhatsApp
 - [ ] Cuenta de Meta Business verificada y plantilla de WhatsApp aprobada
