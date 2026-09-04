@@ -1,0 +1,191 @@
+// Tropa Jiu-Jitsu — Secretario Digital
+// Modelo de datos inicial. Pensado para un solo profesor (Damián) con varios
+// grupos, varias sedes, y avisos automáticos por WhatsApp.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Estructura del gimnasio ----------
+
+model Sede {
+  id        String   @id @default(cuid())
+  nombre    String // "Espacio propio", "Polideportivo"
+  direccion String?
+  grupos    Grupo[]
+  createdAt DateTime @default(now())
+}
+
+enum Disciplina {
+  JIU_JITSU
+  BOX
+  FUNCIONAL
+}
+
+model Grupo {
+  id         String        @id @default(cuid())
+  nombre     String // "BJJ avanzado - mar/jue 20hs"
+  disciplina Disciplina
+  horario    String?
+  sede       Sede?         @relation(fields: [sedeId], references: [id])
+  sedeId     String?
+  alumnos    AlumnoGrupo[]
+  clases     Clase[]
+  createdAt  DateTime      @default(now())
+}
+
+// ---------- Alumnos ----------
+
+model Alumno {
+  id             String               @id @default(cuid())
+  nombre         String
+  apellido       String
+  telefono       String? // para los avisos de WhatsApp
+  email          String?
+  nivel          String? // cinturón / nivel
+  fechaIngreso   DateTime?
+  lesiones       String?
+  objetivos      String?
+  activo         Boolean              @default(true)
+  grupos         AlumnoGrupo[]
+  asistencias    Asistencia[]
+  cuotas         Cuota[]
+  competencias   AlumnoCompetencia[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model AlumnoGrupo {
+  alumno   Alumno @relation(fields: [alumnoId], references: [id])
+  alumnoId String
+  grupo    Grupo  @relation(fields: [grupoId], references: [id])
+  grupoId  String
+
+  @@id([alumnoId, grupoId])
+}
+
+// ---------- Entrenamientos ----------
+
+model Clase {
+  id          String       @id @default(cuid())
+  grupo       Grupo        @relation(fields: [grupoId], references: [id])
+  grupoId     String
+  fecha       DateTime
+  contenido   String? // qué se dio en la clase, para no repetirse
+  notas       String?
+  asistencias Asistencia[]
+  createdAt   DateTime     @default(now())
+}
+
+model Asistencia {
+  id       String  @id @default(cuid())
+  clase    Clase   @relation(fields: [claseId], references: [id])
+  claseId  String
+  alumno   Alumno  @relation(fields: [alumnoId], references: [id])
+  alumnoId String
+  presente Boolean @default(true)
+
+  @@unique([claseId, alumnoId])
+}
+
+// ---------- Cuotas ----------
+
+enum EstadoCuota {
+  PENDIENTE
+  PAGADA
+  VENCIDA
+}
+
+enum MedioPago {
+  EFECTIVO
+  TRANSFERENCIA
+  MERCADO_PAGO
+}
+
+model Cuota {
+  id               String       @id @default(cuid())
+  alumno           Alumno       @relation(fields: [alumnoId], references: [id])
+  alumnoId         String
+  periodo          String // "2026-09"
+  monto            Decimal
+  estado           EstadoCuota  @default(PENDIENTE)
+  fechaVencimiento DateTime
+  fechaPago        DateTime?
+  medioPago        MedioPago?
+  avisos           AvisoWhatsapp[]
+  createdAt        DateTime     @default(now())
+}
+
+// ---------- Competencias ----------
+
+model Competencia {
+  id               String              @id @default(cuid())
+  nombre           String
+  fecha            DateTime
+  lugar            String?
+  inscripcionHasta DateTime?
+  participantes    AlumnoCompetencia[]
+  createdAt        DateTime            @default(now())
+}
+
+model AlumnoCompetencia {
+  id            String      @id @default(cuid())
+  alumno        Alumno      @relation(fields: [alumnoId], references: [id])
+  alumnoId      String
+  competencia   Competencia @relation(fields: [competenciaId], references: [id])
+  competenciaId String
+  categoria     String?
+  objetivo      String?
+  resultado     String?
+}
+
+// ---------- Contenido ----------
+
+enum EstadoIdea {
+  PENDIENTE
+  PUBLICADA
+  DESCARTADA
+}
+
+model IdeaContenido {
+  id          String     @id @default(cuid())
+  titulo      String
+  descripcion String?
+  origen      String? // de dónde salió: clase, competencia, carga manual
+  estado      EstadoIdea @default(PENDIENTE)
+  createdAt   DateTime   @default(now())
+}
+
+// ---------- Avisos por WhatsApp ----------
+// MVP: siempre vía WhatsApp Cloud API (Meta), con plantillas aprobadas
+// para los mensajes que Damián inicia proactivamente (recordatorio de cuota).
+
+enum TipoAviso {
+  RECORDATORIO_CUOTA
+  RESUMEN_DIARIO
+  RESUMEN_SEMANAL
+  COMPETENCIA
+}
+
+enum EstadoAviso {
+  PENDIENTE
+  ENVIADO
+  FALLIDO
+}
+
+model AvisoWhatsapp {
+  id            String      @id @default(cuid())
+  tipo          TipoAviso
+  destinatario  String // teléfono en formato E.164
+  mensaje       String
+  cuota         Cuota?      @relation(fields: [cuotaId], references: [id])
+  cuotaId       String?
+  estado        EstadoAviso @default(PENDIENTE)
+  enviadoAt     DateTime?
+  createdAt     DateTime    @default(now())
+}
