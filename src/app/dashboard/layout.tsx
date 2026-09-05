@@ -16,6 +16,18 @@ export default function DashboardLayout({
             Alumnos
           </Link>
           <Link
+            href="/dashboard/grupos"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            Grupos
+          </Link>
+          <Link
+            href="/dashboard/sedes"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            Sedes
+          </Link>
+          <Link
             href="/dashboard/cuotas"
             className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
           >
