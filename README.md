@@ -79,6 +79,16 @@ npx prisma migrate dev --name init
 npm run dev
 ```
 
+### Acceso a la app
+
+Todavía no hay sistema de usuarios — mientras tanto, `APP_PASSWORD` en
+`.env` prende una contraseña compartida (Basic Auth) para toda la app,
+menos el webhook de WhatsApp (que Meta llama directo, sin login).
+**Importante**: configurarla antes de compartir la URL de producción — sin esto,
+cualquiera con el link ve teléfonos, lesiones y cuotas de los alumnos. El
+middleware vive en `src/middleware.ts` (con `src/` como layout, tiene que
+estar ahí adentro, no en la raíz — si no, Next lo ignora en silencio).
+
 ### Base de datos
 
 Más simple para arrancar: crear un proyecto gratis en
