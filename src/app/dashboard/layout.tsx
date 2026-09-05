@@ -8,7 +8,7 @@ export default function DashboardLayout({
   return (
     <div>
       <nav className="border-b border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto flex max-w-3xl items-center gap-6 px-6 py-4">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-4">
           <Link
             href="/dashboard"
             className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
@@ -26,6 +26,12 @@ export default function DashboardLayout({
             className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
           >
             Sedes
+          </Link>
+          <Link
+            href="/dashboard/clases"
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          >
+            Clases
           </Link>
           <Link
             href="/dashboard/cuotas"
