@@ -56,12 +56,20 @@ export default async function CuotasPage() {
               : `${cuotas.length} cuota${cuotas.length === 1 ? "" : "s"} sin pagar (${vencidas.length} vencida${vencidas.length === 1 ? "" : "s"}) · ${formatMonto(totalAdeudado)} en total`}
           </p>
         </div>
-        <Link
-          href="/dashboard/cuotas/nueva"
-          className="shrink-0 rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-        >
-          + Nueva cuota
-        </Link>
+        <div className="flex shrink-0 gap-2">
+          <Link
+            href="/dashboard/cuotas/generar-mes"
+            className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          >
+            Generar del mes
+          </Link>
+          <Link
+            href="/dashboard/cuotas/nueva"
+            className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+          >
+            + Nueva cuota
+          </Link>
+        </div>
       </div>
 
       {error && (
