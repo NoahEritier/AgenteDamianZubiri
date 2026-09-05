@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { actualizarAlumno, cambiarEstadoAlumno } from "@/lib/actions/alumnos";
+import {
+  actualizarAlumno,
+  asignarGrupo,
+  cambiarEstadoAlumno,
+  quitarGrupo,
+} from "@/lib/actions/alumnos";
 import { AlumnoForm } from "../_components/alumno-form";
 
 export default async function AlumnoPage({
@@ -11,18 +16,26 @@ export default async function AlumnoPage({
 }) {
   const { id } = await params;
 
-  const alumno = await db.alumno.findUnique({
-    where: { id },
-    include: {
-      grupos: { include: { grupo: true } },
-      asistencias: {
-        include: { clase: true },
-        orderBy: { clase: { fecha: "desc" } },
+  const [alumno, todosLosGrupos] = await Promise.all([
+    db.alumno.findUnique({
+      where: { id },
+      include: {
+        grupos: { include: { grupo: true } },
+        asistencias: {
+          include: { clase: true },
+          orderBy: { clase: { fecha: "desc" } },
+        },
       },
-    },
-  });
+    }),
+    db.grupo.findMany({ orderBy: { nombre: "asc" } }),
+  ]);
 
   if (!alumno) notFound();
+
+  const grupoIdsAsignados = new Set(alumno.grupos.map((g) => g.grupoId));
+  const gruposDisponibles = todosLosGrupos.filter(
+    (grupo) => !grupoIdsAsignados.has(grupo.id)
+  );
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
@@ -82,6 +95,66 @@ export default async function AlumnoPage({
           objetivos: alumno.objetivos ?? "",
         }}
       />
+
+      <section className="mt-10 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+        <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">
+          Grupos
+        </h2>
+        {alumno.grupos.length === 0 ? (
+          <p className="mt-2 text-sm text-zinc-500">
+            No está asignado a ningún grupo todavía.
+          </p>
+        ) : (
+          <ul className="mt-2 divide-y divide-zinc-200 dark:divide-zinc-800">
+            {alumno.grupos.map(({ grupo }) => (
+              <li
+                key={grupo.id}
+                className="flex items-center justify-between py-2 text-sm"
+              >
+                <span className="text-zinc-700 dark:text-zinc-300">
+                  {grupo.nombre}
+                </span>
+                <form action={quitarGrupo}>
+                  <input type="hidden" name="alumnoId" value={alumno.id} />
+                  <input type="hidden" name="grupoId" value={grupo.id} />
+                  <button
+                    type="submit"
+                    className="text-xs font-medium text-red-700 hover:underline dark:text-red-400"
+                  >
+                    Quitar
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {gruposDisponibles.length > 0 && (
+          <form
+            action={asignarGrupo}
+            className="mt-4 flex items-center gap-2"
+          >
+            <input type="hidden" name="alumnoId" value={alumno.id} />
+            <select
+              name="grupoId"
+              required
+              className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+            >
+              {gruposDisponibles.map((grupo) => (
+                <option key={grupo.id} value={grupo.id}>
+                  {grupo.nombre}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="shrink-0 rounded-full border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            >
+              Agregar
+            </button>
+          </form>
+        )}
+      </section>
 
       <section className="mt-10 border-t border-zinc-200 pt-6 dark:border-zinc-800">
         <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">

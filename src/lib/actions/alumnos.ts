@@ -61,3 +61,35 @@ export async function cambiarEstadoAlumno(formData: FormData) {
   revalidatePath(`/dashboard/alumnos/${id}`);
   redirect(`/dashboard/alumnos/${id}`);
 }
+
+export async function asignarGrupo(formData: FormData) {
+  const alumnoId = String(formData.get("alumnoId") ?? "");
+  const grupoId = String(formData.get("grupoId") ?? "");
+  if (!alumnoId || !grupoId) {
+    throw new Error("Falta el alumno o el grupo.");
+  }
+
+  await db.alumnoGrupo.upsert({
+    where: { alumnoId_grupoId: { alumnoId, grupoId } },
+    create: { alumnoId, grupoId },
+    update: {},
+  });
+
+  revalidatePath(`/dashboard/alumnos/${alumnoId}`);
+  redirect(`/dashboard/alumnos/${alumnoId}`);
+}
+
+export async function quitarGrupo(formData: FormData) {
+  const alumnoId = String(formData.get("alumnoId") ?? "");
+  const grupoId = String(formData.get("grupoId") ?? "");
+  if (!alumnoId || !grupoId) {
+    throw new Error("Falta el alumno o el grupo.");
+  }
+
+  await db.alumnoGrupo.delete({
+    where: { alumnoId_grupoId: { alumnoId, grupoId } },
+  });
+
+  revalidatePath(`/dashboard/alumnos/${alumnoId}`);
+  redirect(`/dashboard/alumnos/${alumnoId}`);
+}
